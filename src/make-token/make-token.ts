@@ -6,11 +6,20 @@ import getAverageColor from "./get-average-color";
 const makeToken: (config: MakeTokenConfig) => Promise<Buffer> = async ({
   buffer,
 }: MakeTokenConfig) => {
-  const face = cropCircle(await create(buffer), {
+  const input = await create(buffer);
+  const width = input.getWidth();
+  const height = input.getHeight();
+  const semiCircle = cropCircle(input, {
     x: 150,
     y: 150,
     radius: 150,
   });
+  const face =
+    height > 150
+      ? new Jimp(width, height)
+          .composite(semiCircle, 0, 0)
+          .composite(input.clone().crop(0, 150, 300, height - 150), 0, 150)
+      : semiCircle;
   const base = new Jimp(300, 150)
     .composite(
       cropCircle(new Jimp(150, 150, getAverageColor(face)), {
@@ -40,9 +49,9 @@ const makeToken: (config: MakeTokenConfig) => Promise<Buffer> = async ({
       0
     )
     .composite(new Jimp(1, 150, "black"), 150, 0);
-  let image = new Jimp(1200, 300);
+  let image = new Jimp(1200, height + 150);
   for (let i = 0; i < 4; i++) {
-    image = image.composite(face, i * 300, 0).composite(base, i * 300, 150);
+    image = image.composite(face, i * 300, 0).composite(base, i * 300, height);
   }
   return await image.getBufferAsync(MIME_PNG);
 };
