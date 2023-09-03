@@ -20,6 +20,8 @@ const makeToken: (config: MakeTokenConfig) => Promise<Buffer> = async ({
           .composite(semiCircle, 0, 0)
           .composite(input.clone().crop(0, 150, 300, height - 150), 0, 150)
       : semiCircle;
+  const centerLine = new Jimp(1, height, 0x00000030);
+  const sideLine = height > 150 ? new Jimp(1, height - 150, 0x00000030) : null;
   const base = new Jimp(300, 150)
     .composite(
       cropCircle(new Jimp(150, 150, getAverageColor(face)), {
@@ -51,7 +53,13 @@ const makeToken: (config: MakeTokenConfig) => Promise<Buffer> = async ({
     .composite(new Jimp(1, 150, "black"), 150, 0);
   let image = new Jimp(1200, height + 150);
   for (let i = 0; i < 4; i++) {
-    image = image.composite(face, i * 300, 0).composite(base, i * 300, height);
+    image = image
+      .composite(face, i * 300, 0)
+      .composite(base, i * 300, height)
+      .composite(centerLine, i * 300 + 150, 0);
+    if (sideLine && i > 0) {
+      image = image.composite(sideLine, i * 300, 150);
+    }
   }
   return await image.getBufferAsync(MIME_PNG);
 };
