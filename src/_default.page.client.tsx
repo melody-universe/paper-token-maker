@@ -2,6 +2,10 @@ import { StrictMode } from "react";
 import { Root, createRoot, hydrateRoot } from "react-dom/client";
 import { PageContext } from "./types";
 import { HelmetProvider } from "react-helmet-async";
+import "@fontsource/roboto/300.css";
+import "@fontsource/roboto/400.css";
+import "@fontsource/roboto/500.css";
+import "@fontsource/roboto/700.css";
 
 export const clientRouting = true;
 

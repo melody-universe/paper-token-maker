@@ -3,6 +3,7 @@ import { dangerouslySkipEscape } from "vite-plugin-ssr/server";
 import { PageContext } from "./types";
 import { FilledContext, Helmet, HelmetProvider } from "react-helmet-async";
 import { StrictMode } from "react";
+import { CssBaseline } from "@mui/material";
 
 export const passToClient = ["documentProps", "pageProps"];
 
@@ -14,6 +15,7 @@ export const render = ({ Page, pageProps }: PageContext) => {
         <Helmet>
           <title>Paper Token Maker</title>
         </Helmet>
+        <CssBaseline />
         <Page {...pageProps} />
       </HelmetProvider>
     </StrictMode>
