@@ -3,13 +3,15 @@ import { describe, expect, test } from "vitest";
 import makeToken from "../src/make-token";
 import { readFile } from "fs/promises";
 import { join } from "path";
+import { MakeTokenOptions } from "../src/make-token/make-token";
 
 expect.extend({ toMatchImageSnapshot });
 
 const loadSample = async (name: string) =>
   readFile(join(__dirname, `samples/${name}`));
 
-const makeSample = async (name: string) => makeToken(await loadSample(name));
+const makeSample = async (name: string, options?: MakeTokenOptions) =>
+  makeToken(await loadSample(name), options);
 
 describe("default", () => {
   test("1-inch square", () =>
@@ -20,6 +22,13 @@ describe("default", () => {
 
   test("1.5-inch", () =>
     expect(makeSample("1.5in.jpg")).resolves.toMatchImageSnapshot());
+});
+
+describe("options", () => {
+  test("base color", () =>
+    expect(
+      makeSample("1in-square.jpg", { baseColor: "#2c8265" })
+    ).resolves.toMatchImageSnapshot());
 });
 
 describe("invalid input", () => {

@@ -5,8 +5,8 @@ const validSizes = new Set([300, 450]);
 
 const makeToken: (
   buffer: Buffer,
-  config?: MakeTokenConfig
-) => Promise<Buffer> = async (buffer) => {
+  options?: MakeTokenOptions
+) => Promise<Buffer> = async (buffer, options) => {
   const input = await create(buffer);
   const width = input.getWidth();
 
@@ -37,7 +37,7 @@ const makeToken: (
     height > radius ? new Jimp(1, height - radius, 0x00000030) : null;
   const base = new Jimp(width, radius)
     .composite(
-      cropCircle(new Jimp(radius, radius, "black"), {
+      cropCircle(new Jimp(radius, radius, options?.baseColor ?? "black"), {
         x: radius,
         y: 0,
         radius,
@@ -78,4 +78,4 @@ const makeToken: (
 };
 export default makeToken;
 
-type MakeTokenConfig = {};
+export type MakeTokenOptions = { baseColor?: string };
