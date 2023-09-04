@@ -3,6 +3,9 @@ import cropCircle from "./crop-circle";
 
 const validSizes = new Set([300, 450]);
 
+const foldColor = 0x00000030;
+const lightFoldColor = 0xffffff30;
+
 const createBaseFactory = async (
   width: number,
   radius: number,
@@ -22,7 +25,8 @@ const createBaseFactory = async (
       0,
       0
     )
-    .composite(new Jimp(1, radius, "black"), 0, 0);
+    .composite(new Jimp(1, radius, "black"), 0, 0)
+    .composite(new Jimp(radius, 1, foldColor), 0, 0);
 
   if (options?.buffer) {
     const image = (await create(options.buffer)).circle();
@@ -36,6 +40,7 @@ const createBaseFactory = async (
           0,
           0
         )
+        .composite(new Jimp(radius, 1, foldColor), 0, 0)
         .composite(fold, radius, 0);
   } else {
     const base = new Jimp(width, radius)
@@ -45,6 +50,11 @@ const createBaseFactory = async (
           y: 0,
           radius,
         }),
+        0,
+        0
+      )
+      .composite(
+        new Jimp(radius, 1, options?.color ? foldColor : lightFoldColor),
         0,
         0
       )
@@ -82,9 +92,9 @@ const makeToken: (
             radius
           )
       : semiCircle;
-  const centerLine = new Jimp(1, height, 0x00000030);
+  const centerLine = new Jimp(1, height, foldColor);
   const sideLine =
-    height > radius ? new Jimp(1, height - radius, 0x00000030) : null;
+    height > radius ? new Jimp(1, height - radius, foldColor) : null;
   const getBase = await createBaseFactory(width, radius, options?.base);
 
   let image = new Jimp(width * 4, height + radius);
