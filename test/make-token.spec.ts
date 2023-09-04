@@ -13,15 +13,13 @@ const makeSample = async (name: string) => makeToken(await loadSample(name));
 
 describe("default", () => {
   test("1-inch square", () =>
-    expect(
-      makeSample("default-1in-square.jpg")
-    ).resolves.toMatchImageSnapshot());
+    expect(makeSample("1in-square.jpg")).resolves.toMatchImageSnapshot());
 
   test("1-inch tall", () =>
-    expect(makeSample("default-1in-tall.jpg")).resolves.toMatchImageSnapshot());
+    expect(makeSample("1in-tall.jpg")).resolves.toMatchImageSnapshot());
 
   test("1.5-inch", () =>
-    expect(makeSample("default-1.5in.jpg")).resolves.toMatchImageSnapshot());
+    expect(makeSample("1.5in.jpg")).resolves.toMatchImageSnapshot());
 });
 
 describe("invalid input", () => {
