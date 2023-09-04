@@ -1,9 +1,8 @@
 import { toMatchImageSnapshot } from "jest-image-snapshot";
 import { describe, expect, test } from "vitest";
-import makeToken from "../src/make-token";
+import makeToken, { MakeTokenOptions } from "../src/make-token";
 import { readFile } from "fs/promises";
 import { join } from "path";
-import { MakeTokenOptions } from "../src/make-token/make-token";
 
 expect.extend({ toMatchImageSnapshot });
 
@@ -27,7 +26,14 @@ describe("default", () => {
 describe("options", () => {
   test("base color", () =>
     expect(
-      makeSample("1in-square.jpg", { baseColor: "#2c8265" })
+      makeSample("1in-square.jpg", { base: { color: "#2c8265" } })
+    ).resolves.toMatchImageSnapshot());
+
+  test("base image", async () =>
+    expect(
+      makeSample("1in-square.jpg", {
+        base: { buffer: await loadSample("1in-base.jpg") },
+      })
     ).resolves.toMatchImageSnapshot());
 });
 

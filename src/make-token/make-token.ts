@@ -3,6 +3,56 @@ import cropCircle from "./crop-circle";
 
 const validSizes = new Set([300, 450]);
 
+const createBaseFactory = async (
+  width: number,
+  radius: number,
+  options?: BaseOptions
+) => {
+  const fold = cropCircle(new Jimp(radius, radius, "black"), {
+    x: 0,
+    y: 0,
+    radius,
+  })
+    .composite(
+      cropCircle(new Jimp(radius, radius, "white"), {
+        x: 0,
+        y: 0,
+        radius: radius - 1,
+      }),
+      0,
+      0
+    )
+    .composite(new Jimp(1, radius, "black"), 0, 0);
+
+  if (options?.buffer) {
+    const image = (await create(options.buffer)).circle();
+    return (index: number) =>
+      new Jimp(width, radius)
+        .composite(
+          image
+            .clone()
+            .rotate(-1 * index * 90)
+            .crop(0, radius, radius, radius),
+          0,
+          0
+        )
+        .composite(fold, radius, 0);
+  } else {
+    const base = new Jimp(width, radius)
+      .composite(
+        cropCircle(new Jimp(radius, radius, options?.color ?? "black"), {
+          x: radius,
+          y: 0,
+          radius,
+        }),
+        0,
+        0
+      )
+      .composite(fold, radius, 0);
+    return (_: number) => base;
+  }
+};
+
 const makeToken: (
   buffer: Buffer,
   options?: MakeTokenOptions
@@ -35,40 +85,13 @@ const makeToken: (
   const centerLine = new Jimp(1, height, 0x00000030);
   const sideLine =
     height > radius ? new Jimp(1, height - radius, 0x00000030) : null;
-  const base = new Jimp(width, radius)
-    .composite(
-      cropCircle(new Jimp(radius, radius, options?.baseColor ?? "black"), {
-        x: radius,
-        y: 0,
-        radius,
-      }),
-      0,
-      0
-    )
-    .composite(
-      cropCircle(new Jimp(radius, radius, "black"), {
-        x: 0,
-        y: 0,
-        radius,
-      }),
-      radius,
-      0
-    )
-    .composite(
-      cropCircle(new Jimp(radius, radius, "white"), {
-        x: 0,
-        y: 0,
-        radius: radius - 1,
-      }),
-      radius,
-      0
-    )
-    .composite(new Jimp(1, radius, "black"), radius, 0);
+  const getBase = await createBaseFactory(width, radius, options?.base);
+
   let image = new Jimp(width * 4, height + radius);
   for (let i = 0; i < 4; i++) {
     image = image
       .composite(face, i * width, 0)
-      .composite(base, i * width, height)
+      .composite(getBase(i), i * width, height)
       .composite(centerLine, i * width + radius, 0);
     if (sideLine && i > 0) {
       image = image.composite(sideLine, i * width, radius);
@@ -78,4 +101,5 @@ const makeToken: (
 };
 export default makeToken;
 
-export type MakeTokenOptions = { baseColor?: string };
+type BaseOptions = { color?: string; buffer?: Buffer };
+export type MakeTokenOptions = { base?: BaseOptions };
