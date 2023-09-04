@@ -2,11 +2,18 @@ import Jimp, { create, MIME_PNG } from "jimp";
 import type MakeTokenConfig from "./MakeTokenConfig";
 import cropCircle from "./crop-circle";
 
+const validSizes = new Set([300, 450]);
+
 const makeToken: (config: MakeTokenConfig) => Promise<Buffer> = async ({
   buffer,
 }: MakeTokenConfig) => {
   const input = await create(buffer);
   const width = input.getWidth();
+
+  if (!validSizes.has(width)) {
+    throw new Error("invalid size");
+  }
+
   const height = input.getHeight();
   const radius = width / 2;
   const semiCircle = cropCircle(input, {
@@ -14,6 +21,7 @@ const makeToken: (config: MakeTokenConfig) => Promise<Buffer> = async ({
     y: radius,
     radius,
   });
+
   const face =
     height > radius
       ? new Jimp(width, height)

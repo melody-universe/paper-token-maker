@@ -31,3 +31,10 @@ describe("default", () => {
       })
     ).toMatchImageSnapshot());
 });
+
+describe("invalid input", () => {
+  test("invalid size", () =>
+    expect(async () =>
+      makeToken({ buffer: await loadSample("1x1.png") })
+    ).rejects.toThrowError("invalid size"));
+});
