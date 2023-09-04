@@ -14,4 +14,6 @@ const testSample = (sampleName: string) =>
       })
     ).toMatchImageSnapshot());
 
-["default-1in-square.jpg", "default-1in-tall.jpg"].forEach(testSample);
+["default-1in-square.jpg", "default-1in-tall.jpg", "default-1.5in.jpg"].forEach(
+  testSample
+);
