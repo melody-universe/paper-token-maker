@@ -1,7 +1,6 @@
 import Jimp, { create, MIME_PNG } from "jimp";
 import type MakeTokenConfig from "./MakeTokenConfig";
 import cropCircle from "./crop-circle";
-import getAverageColor from "./get-average-color";
 
 const makeToken: (config: MakeTokenConfig) => Promise<Buffer> = async ({
   buffer,
@@ -30,7 +29,7 @@ const makeToken: (config: MakeTokenConfig) => Promise<Buffer> = async ({
     height > radius ? new Jimp(1, height - radius, 0x00000030) : null;
   const base = new Jimp(width, radius)
     .composite(
-      cropCircle(new Jimp(radius, radius, getAverageColor(face)), {
+      cropCircle(new Jimp(radius, radius, "black"), {
         x: radius,
         y: 0,
         radius,
