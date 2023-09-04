@@ -9,32 +9,22 @@ expect.extend({ toMatchImageSnapshot });
 const loadSample = async (name: string) =>
   readFile(join(__dirname, `samples/${name}`));
 
+const makeSample = async (name: string) => makeToken(await loadSample(name));
+
 describe("default", () => {
-  test("1-inch square", async () =>
+  test("1-inch square", () =>
     expect(
-      await makeToken({
-        buffer: await loadSample("default-1in-square.jpg"),
-      })
-    ).toMatchImageSnapshot());
+      makeSample("default-1in-square.jpg")
+    ).resolves.toMatchImageSnapshot());
 
-  test("1-inch tall", async () =>
-    expect(
-      await makeToken({
-        buffer: await loadSample("default-1in-tall.jpg"),
-      })
-    ).toMatchImageSnapshot());
+  test("1-inch tall", () =>
+    expect(makeSample("default-1in-tall.jpg")).resolves.toMatchImageSnapshot());
 
-  test("1.5-inch", async () =>
-    expect(
-      await makeToken({
-        buffer: await loadSample("default-1.5in.jpg"),
-      })
-    ).toMatchImageSnapshot());
+  test("1.5-inch", () =>
+    expect(makeSample("default-1.5in.jpg")).resolves.toMatchImageSnapshot());
 });
 
 describe("invalid input", () => {
   test("invalid size", () =>
-    expect(async () =>
-      makeToken({ buffer: await loadSample("1x1.png") })
-    ).rejects.toThrowError("invalid size"));
+    expect(makeSample("1x1.png")).rejects.toThrowError("invalid size"));
 });

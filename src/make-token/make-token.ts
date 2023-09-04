@@ -1,12 +1,12 @@
 import Jimp, { create, MIME_PNG } from "jimp";
-import type MakeTokenConfig from "./MakeTokenConfig";
 import cropCircle from "./crop-circle";
 
 const validSizes = new Set([300, 450]);
 
-const makeToken: (config: MakeTokenConfig) => Promise<Buffer> = async ({
-  buffer,
-}: MakeTokenConfig) => {
+const makeToken: (
+  buffer: Buffer,
+  config?: MakeTokenConfig
+) => Promise<Buffer> = async (buffer) => {
   const input = await create(buffer);
   const width = input.getWidth();
 
@@ -77,3 +77,5 @@ const makeToken: (config: MakeTokenConfig) => Promise<Buffer> = async ({
   return await image.getBufferAsync(MIME_PNG);
 };
 export default makeToken;
+
+type MakeTokenConfig = {};
