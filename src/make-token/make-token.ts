@@ -1,7 +1,7 @@
 import Jimp, { create, MIME_PNG } from "jimp";
 import cropCircle from "./crop-circle";
 
-const validSizes = new Set([300, 450]);
+const validSizes = new Set([240, 300, 450, 600]);
 
 const foldColor = 0x00000030;
 const lightFoldColor = 0xffffff30;
@@ -81,11 +81,29 @@ const makeToken: (
     y: radius,
     radius,
   });
+  const topBorder = new Jimp(width, height, foldColor).mask(
+    cropCircle(new Jimp(width, radius, "white"), {
+      x: radius,
+      y: radius,
+      radius,
+    }).composite(
+      cropCircle(new Jimp(width, radius, "black"), {
+        x: radius,
+        y: radius,
+        radius: radius - 1,
+      }),
+      0,
+      0
+    ),
+    0,
+    0
+  );
 
   const face =
     height > radius
       ? new Jimp(width, height)
           .composite(semiCircle, 0, 0)
+          .composite(topBorder, 0, 0)
           .composite(
             input.clone().crop(0, radius, width, height - radius),
             0,
@@ -106,6 +124,12 @@ const makeToken: (
     if (sideLine && i > 0) {
       image = image.composite(sideLine, i * width, radius);
     }
+  }
+  if (height > radius) {
+    const sideLine = new Jimp(1, height - radius, foldColor);
+    image = image
+      .composite(sideLine, 0, radius)
+      .composite(sideLine, width * 4 - 1, radius);
   }
   return await image.getBufferAsync(MIME_PNG);
 };
