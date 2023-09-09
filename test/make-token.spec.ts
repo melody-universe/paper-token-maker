@@ -6,38 +6,58 @@ import { join } from "path";
 
 expect.extend({ toMatchImageSnapshot });
 
-const loadSample = async (name: string) =>
-  readFile(join(__dirname, `samples/${name}`));
-
-const makeSample = async (name: string, options?: MakeTokenOptions) =>
-  makeToken(await loadSample(name), options);
-
-describe("default", () => {
-  test("1-inch square", () =>
-    expect(makeSample("1in-square.jpg")).resolves.toMatchImageSnapshot());
-
-  test("1-inch tall", () =>
-    expect(makeSample("1in-tall.jpg")).resolves.toMatchImageSnapshot());
-
-  test("1.5-inch", () =>
-    expect(makeSample("1.5in.jpg")).resolves.toMatchImageSnapshot());
+describe.concurrent("default", () => {
+  runSnapshotTest("1-inch square", "1in-square.jpg");
+  runSnapshotTest("1-inch tall", "1in-tall.jpg");
+  runSnapshotTest("1.5-inch", "1.5in.jpg");
 });
 
-describe("options", () => {
-  test("base color", () =>
-    expect(
-      makeSample("1in-square.jpg", { base: { color: "#2c8265" } })
-    ).resolves.toMatchImageSnapshot());
-
-  test("base image", async () =>
-    expect(
-      makeSample("1in-square.jpg", {
-        base: { buffer: await loadSample("1in-base.jpg") },
-      })
-    ).resolves.toMatchImageSnapshot());
+describe.concurrent("options", () => {
+  runSnapshotTest("base color", "1in-square.jpg", {
+    base: { color: "#2c8265" },
+  });
+  runSnapshotTest("base image", "1in-square.jpg", async () => ({
+    base: { buffer: await loadImage("1in-base.jpg") },
+  }));
 });
 
 describe("invalid input", () => {
-  test("invalid size", () =>
-    expect(makeSample("1x1.png")).rejects.toThrowError("invalid size"));
+  test("invalid size", async () =>
+    expect(makeToken(await loadImage("1x1.png"))).rejects.toThrowError(
+      "invalid size"
+    ));
 });
+
+function runSnapshotTest(
+  name: string,
+  imageName: string,
+  optionsFactory: () => Promise<MakeTokenOptions>
+): void;
+function runSnapshotTest(
+  name: string,
+  imageName: string,
+  options?: MakeTokenOptions
+): void;
+function runSnapshotTest(
+  name: string,
+  imageName: string,
+  options?: MakeTokenOptions | (() => Promise<MakeTokenOptions>)
+) {
+  test(name, async ({ expect }) =>
+    expect(
+      typeof options === "function"
+        ? makeToken(...(await Promise.all([loadImage(imageName), options()])))
+        : makeToken(await loadImage(imageName), options)
+    ).resolves.toMatchImageSnapshot({
+      customSnapshotIdentifier: name.replace(/[. ]/, "-"),
+    })
+  );
+}
+
+const imagePromises = new Map<string, Promise<Buffer>>();
+function loadImage(name: string) {
+  if (!imagePromises.has(name)) {
+    imagePromises.set(name, readFile(join(__dirname, "samples", name)));
+  }
+  return imagePromises.get(name)!;
+}
