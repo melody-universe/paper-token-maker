@@ -15,13 +15,15 @@ export default function makeSheet(images: Jimp[]) {
   const sheet = new Jimp(sheetWidth, sheetHeight);
   let x = 0;
   let y = 0;
+  let currentRowHeight = 0;
   for (const image of images) {
     if (x + image.getWidth() > sheetWidth) {
-      y += image.getHeight();
+      y += currentRowHeight;
       x = 0;
     }
     sheet.composite(image, x, y);
     x += image.getWidth();
+    currentRowHeight = Math.max(currentRowHeight, image.getHeight());
   }
   return sheet;
 }

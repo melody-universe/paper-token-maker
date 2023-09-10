@@ -11,6 +11,9 @@ it("creates a sheet", async ({ expect }) => {
       new Jimp(1200, 450, "#f00"),
       new Jimp(1200, 450, "#0f0"),
       new Jimp(1200, 450, "#00f"),
+      new Jimp(1200, 550, "#0ff"),
+      new Jimp(1200, 450, "#f0f"),
+      new Jimp(1200, 450, "#ff0"),
     ]).getBufferAsync(MIME_PNG)
   ).resolves.toMatchImageSnapshot({
     customSnapshotIdentifier: "makeSheet",
