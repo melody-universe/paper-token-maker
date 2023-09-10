@@ -11,8 +11,17 @@ const ppi = 300;
 const sheetWidth = contentWidth * ppi;
 const sheetHeight = contentHeight * ppi;
 
-export default function makeSheet(image: Jimp) {
+export default function makeSheet(images: Jimp[]) {
   const sheet = new Jimp(sheetWidth, sheetHeight);
-  sheet.composite(image, 0, 0);
+  let x = 0;
+  let y = 0;
+  for (const image of images) {
+    if (x + image.getWidth() > sheetWidth) {
+      y += image.getHeight();
+      x = 0;
+    }
+    sheet.composite(image, x, y);
+    x += image.getWidth();
+  }
   return sheet;
 }
