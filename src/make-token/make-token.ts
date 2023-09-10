@@ -1,4 +1,4 @@
-import Jimp, { create, MIME_PNG } from "jimp";
+import Jimp, { create } from "jimp";
 import cropCircle from "./crop-circle";
 
 const validSizes = new Set([240, 300, 450, 600]);
@@ -66,7 +66,7 @@ const createBaseFactory = async (
 const makeToken: (
   buffer: Buffer,
   options?: MakeTokenOptions
-) => Promise<Buffer> = async (buffer, options) => {
+) => Promise<Jimp> = async (buffer, options) => {
   const input = await create(buffer);
   const width = input.getWidth();
 
@@ -131,7 +131,7 @@ const makeToken: (
       .composite(sideLine, 0, radius)
       .composite(sideLine, width * 4 - 1, radius);
   }
-  return await image.getBufferAsync(MIME_PNG);
+  return image;
 };
 export default makeToken;
 

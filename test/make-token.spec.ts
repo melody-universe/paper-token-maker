@@ -3,6 +3,7 @@ import { describe, expect, test } from "vitest";
 import makeToken, { MakeTokenOptions } from "../src/make-token";
 import { readFile } from "fs/promises";
 import { join } from "path";
+import { MIME_PNG } from "jimp";
 
 expect.extend({ toMatchImageSnapshot });
 
@@ -45,9 +46,11 @@ function runSnapshotTest(
 ) {
   test(name, async ({ expect }) =>
     expect(
-      typeof options === "function"
-        ? makeToken(...(await Promise.all([loadImage(imageName), options()])))
-        : makeToken(await loadImage(imageName), options)
+      (
+        await (typeof options === "function"
+          ? makeToken(...(await Promise.all([loadImage(imageName), options()])))
+          : makeToken(await loadImage(imageName), options))
+      ).getBufferAsync(MIME_PNG)
     ).resolves.toMatchImageSnapshot({
       customSnapshotIdentifier: name.replace(/[. ]/, "-"),
     })
