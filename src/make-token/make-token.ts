@@ -59,7 +59,7 @@ const createBaseFactory = async (
         0
       )
       .composite(fold, radius, 0);
-    return (_: number) => base;
+    return () => base;
   }
 };
 
